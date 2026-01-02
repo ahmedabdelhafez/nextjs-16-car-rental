@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../lib/generated/prisma"
@@ -11,4 +5,504 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model bank {
+  bank_id         String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  bank_name       String            @db.VarChar(255)
+  branch_code     String?           @db.VarChar(50)
+  contact_info    String?
+  api_endpoint    String?           @db.VarChar(255)
+  api_key         String?           @db.VarChar(255)
+  is_active       Boolean?          @default(true)
+  created_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  bankaccount     bankaccount[]
+  installmentplan installmentplan[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model bankaccount {
+  account_id      String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  customer_id     String?       @db.Uuid
+  bank_id         String?       @db.Uuid
+  account_number  String        @db.VarChar(100)
+  account_type    String?       @db.VarChar(50)
+  account_status  String?       @default("Active") @db.VarChar(50)
+  verification_id String?       @db.Uuid
+  created_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  bank            bank?         @relation(fields: [bank_id], references: [bank_id], onUpdate: NoAction)
+  customer        customer?     @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade, onUpdate: NoAction)
+  verification    verification? @relation(fields: [verification_id], references: [verification_id], onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model customer {
+  customer_id        String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  first_name         String               @db.VarChar(100)
+  last_name          String               @db.VarChar(100)
+  email              String               @unique @db.VarChar(255)
+  phone              String?              @db.VarChar(50)
+  address            String?
+  date_of_birth      DateTime?            @db.Date
+  license_number     String?              @db.VarChar(100)
+  license_expiry     DateTime?            @db.Date
+  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  is_active          Boolean?             @default(true)
+  bankaccount        bankaccount[]
+  installmentplan    installmentplan[]
+  partsale           partsale[]
+  rentalagreement    rentalagreement[]
+  serviceappointment serviceappointment[]
+  servicerecord      servicerecord[]
+  trafficrecord      trafficrecord[]
+  transaction        transaction[]
+  verification       verification[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model employee {
+  employee_id        String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  first_name         String               @db.VarChar(100)
+  last_name          String               @db.VarChar(100)
+  email              String               @unique @db.VarChar(255)
+  phone              String?              @db.VarChar(50)
+  position           String?              @db.VarChar(100)
+  department         String?              @db.VarChar(100)
+  hire_date          DateTime?            @default(dbgenerated("CURRENT_DATE")) @db.Date
+  is_active          Boolean?             @default(true)
+  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  partsale           partsale[]
+  serviceappointment serviceappointment[]
+  transaction        transaction[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model installmentplan {
+  plan_id         String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  transaction_id  String?      @db.Uuid
+  customer_id     String?      @db.Uuid
+  bank_id         String?      @db.Uuid
+  total_amount    Decimal      @db.Decimal(12, 2)
+  down_payment    Decimal?     @default(0) @db.Decimal(12, 2)
+  interest_rate   Decimal?     @default(0) @db.Decimal(5, 2)
+  term_months     Int
+  monthly_payment Decimal      @db.Decimal(10, 2)
+  start_date      DateTime     @db.Date
+  end_date        DateTime     @db.Date
+  plan_status     plan_status? @default(Active)
+  created_at      DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?    @default(now()) @db.Timestamptz(6)
+  bank            bank?        @relation(fields: [bank_id], references: [bank_id], onUpdate: NoAction)
+  customer        customer?    @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade, onUpdate: NoAction)
+  transaction     transaction? @relation(fields: [transaction_id], references: [transaction_id], onDelete: Cascade, onUpdate: NoAction)
+  payment         payment[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model part {
+  part_id        String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  part_number    String          @unique @db.VarChar(100)
+  name           String          @db.VarChar(255)
+  description    String?
+  category       String?         @db.VarChar(100)
+  unit_price     Decimal         @db.Decimal(10, 2)
+  stock_quantity Int?            @default(0)
+  reorder_level  Int?            @default(5)
+  supplier_id    String?         @db.Uuid
+  is_active      Boolean?        @default(true)
+  created_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  supplier       supplier?       @relation(fields: [supplier_id], references: [supplier_id], onUpdate: NoAction)
+  partorderitem  partorderitem[]
+  partsaleitem   partsaleitem[]
+  servicepart    servicepart[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model partorder {
+  order_id               String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  supplier_id            String?         @db.Uuid
+  order_date             DateTime?       @default(now()) @db.Timestamptz(6)
+  expected_delivery_date DateTime?       @db.Timestamptz(6)
+  status                 order_status?   @default(Pending)
+  total_amount           Decimal?        @default(0) @db.Decimal(12, 2)
+  notes                  String?
+  created_at             DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?       @default(now()) @db.Timestamptz(6)
+  supplier               supplier?       @relation(fields: [supplier_id], references: [supplier_id], onUpdate: NoAction)
+  partorderitem          partorderitem[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model partorderitem {
+  order_item_id String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  order_id      String?    @db.Uuid
+  part_id       String?    @db.Uuid
+  quantity      Int
+  unit_price    Decimal    @db.Decimal(10, 2)
+  total_price   Decimal    @db.Decimal(12, 2)
+  created_at    DateTime?  @default(now()) @db.Timestamptz(6)
+  partorder     partorder? @relation(fields: [order_id], references: [order_id], onDelete: Cascade, onUpdate: NoAction)
+  part          part?      @relation(fields: [part_id], references: [part_id], onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model partsale {
+  sale_id        String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  customer_id    String?         @db.Uuid
+  employee_id    String?         @db.Uuid
+  sale_date      DateTime?       @default(now()) @db.Timestamptz(6)
+  total_amount   Decimal?        @default(0) @db.Decimal(12, 2)
+  payment_method payment_method?
+  sale_status    sale_status?    @default(Pending)
+  notes          String?
+  created_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  customer       customer?       @relation(fields: [customer_id], references: [customer_id], onUpdate: NoAction)
+  employee       employee?       @relation(fields: [employee_id], references: [employee_id], onUpdate: NoAction)
+  partsaleitem   partsaleitem[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model partsaleitem {
+  sale_item_id String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sale_id      String?   @db.Uuid
+  part_id      String?   @db.Uuid
+  quantity     Int
+  unit_price   Decimal   @db.Decimal(10, 2)
+  total_price  Decimal   @db.Decimal(12, 2)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  part         part?     @relation(fields: [part_id], references: [part_id], onUpdate: NoAction)
+  partsale     partsale? @relation(fields: [sale_id], references: [sale_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model payment {
+  payment_id            String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  plan_id               String?          @db.Uuid
+  transaction_id        String?          @db.Uuid
+  payment_date          DateTime?        @default(now()) @db.Timestamptz(6)
+  amount                Decimal          @db.Decimal(12, 2)
+  payment_status        payment_status?  @default(Pending)
+  payment_method        payment_method?
+  transaction_reference String?          @db.VarChar(255)
+  created_at            DateTime?        @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime?        @default(now()) @db.Timestamptz(6)
+  installmentplan       installmentplan? @relation(fields: [plan_id], references: [plan_id], onUpdate: NoAction)
+  transaction           transaction?     @relation(fields: [transaction_id], references: [transaction_id], onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model rentalagreement {
+  agreement_id         String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  transaction_id       String?           @db.Uuid
+  customer_id          String?           @db.Uuid
+  vehicle_id           String?           @db.Uuid
+  start_date           DateTime          @db.Timestamptz(6)
+  end_date             DateTime          @db.Timestamptz(6)
+  expected_return_date DateTime?         @db.Timestamptz(6)
+  actual_return_date   DateTime?         @db.Timestamptz(6)
+  daily_rate           Decimal           @db.Decimal(10, 2)
+  total_amount         Decimal           @db.Decimal(12, 2)
+  deposit_amount       Decimal?          @default(0) @db.Decimal(12, 2)
+  agreement_status     agreement_status? @default(Active)
+  created_at           DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?         @default(now()) @db.Timestamptz(6)
+  customer             customer?         @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade, onUpdate: NoAction)
+  transaction          transaction?      @relation(fields: [transaction_id], references: [transaction_id], onDelete: Cascade, onUpdate: NoAction)
+  vehicle              vehicle?          @relation(fields: [vehicle_id], references: [vehicle_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model serviceappointment {
+  appointment_id   String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  customer_id      String?             @db.Uuid
+  vehicle_id       String?             @db.Uuid
+  center_id        String?             @db.Uuid
+  bay_id           String?             @db.Uuid
+  service_type_id  String?             @db.Uuid
+  employee_id      String?             @db.Uuid
+  appointment_date DateTime            @db.Date
+  start_time       DateTime            @db.Time(6)
+  end_time         DateTime            @db.Time(6)
+  status           appointment_status? @default(Scheduled)
+  notes            String?
+  created_at       DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?           @default(now()) @db.Timestamptz(6)
+  servicebay       servicebay?         @relation(fields: [bay_id], references: [bay_id], onUpdate: NoAction)
+  servicecenter    servicecenter?      @relation(fields: [center_id], references: [center_id], onUpdate: NoAction)
+  customer         customer?           @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade, onUpdate: NoAction)
+  employee         employee?           @relation(fields: [employee_id], references: [employee_id], onUpdate: NoAction)
+  servicetype      servicetype?        @relation(fields: [service_type_id], references: [type_id], onUpdate: NoAction)
+  vehicle          vehicle?            @relation(fields: [vehicle_id], references: [vehicle_id], onUpdate: NoAction)
+  servicerecord    servicerecord[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model servicebay {
+  bay_id             String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  center_id          String?              @db.Uuid
+  bay_number         String               @db.VarChar(50)
+  bay_type           bay_type?            @default(Standard)
+  status             bay_status?          @default(Available)
+  description        String?
+  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  serviceappointment serviceappointment[]
+  servicecenter      servicecenter?       @relation(fields: [center_id], references: [center_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model servicecenter {
+  center_id          String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name               String               @db.VarChar(255)
+  location           String?
+  contact_info       String?
+  operating_hours    String?              @db.VarChar(255)
+  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  serviceappointment serviceappointment[]
+  servicebay         servicebay[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model servicepart {
+  service_part_id String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  record_id       String?        @db.Uuid
+  part_id         String?        @db.Uuid
+  quantity        Int
+  unit_price      Decimal        @db.Decimal(10, 2)
+  total_price     Decimal        @db.Decimal(12, 2)
+  created_at      DateTime?      @default(now()) @db.Timestamptz(6)
+  part            part?          @relation(fields: [part_id], references: [part_id], onUpdate: NoAction)
+  servicerecord   servicerecord? @relation(fields: [record_id], references: [record_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model servicerecord {
+  record_id          String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  appointment_id     String?             @db.Uuid
+  customer_id        String?             @db.Uuid
+  vehicle_id         String?             @db.Uuid
+  service_date       DateTime?           @default(now()) @db.Timestamptz(6)
+  odometer_reading   Int?
+  service_details    String?
+  labor_cost         Decimal?            @default(0) @db.Decimal(10, 2)
+  parts_cost         Decimal?            @default(0) @db.Decimal(10, 2)
+  total_cost         Decimal?            @default(0) @db.Decimal(12, 2)
+  warranty_info      String?
+  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  servicepart        servicepart[]
+  serviceappointment serviceappointment? @relation(fields: [appointment_id], references: [appointment_id], onUpdate: NoAction)
+  customer           customer?           @relation(fields: [customer_id], references: [customer_id], onUpdate: NoAction)
+  vehicle            vehicle?            @relation(fields: [vehicle_id], references: [vehicle_id], onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model servicetype {
+  type_id            String                   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name               String                   @db.VarChar(100)
+  description        String?
+  duration           Unsupported("interval")?
+  base_price         Decimal?                 @db.Decimal(10, 2)
+  is_active          Boolean?                 @default(true)
+  created_at         DateTime?                @default(now()) @db.Timestamptz(6)
+  serviceappointment serviceappointment[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model supplier {
+  supplier_id   String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name          String      @db.VarChar(255)
+  contact_info  String?
+  address       String?
+  payment_terms String?
+  is_active     Boolean?    @default(true)
+  created_at    DateTime?   @default(now()) @db.Timestamptz(6)
+  part          part[]
+  partorder     partorder[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model trafficrecord {
+  record_id         String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  customer_id       String?       @db.Uuid
+  license_number    String        @db.VarChar(100)
+  violation_status  String?       @db.VarChar(50)
+  violation_details String?
+  verification_id   String?       @db.Uuid
+  last_checked_date DateTime?     @default(now()) @db.Timestamptz(6)
+  customer          customer?     @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade, onUpdate: NoAction)
+  verification      verification? @relation(fields: [verification_id], references: [verification_id], onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model transaction {
+  transaction_id     String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  customer_id        String?             @db.Uuid
+  vehicle_id         String?             @db.Uuid
+  employee_id        String?             @db.Uuid
+  transaction_type   transaction_type
+  transaction_date   DateTime?           @default(now()) @db.Timestamptz(6)
+  amount             Decimal             @db.Decimal(12, 2)
+  payment_method     payment_method?
+  transaction_status transaction_status? @default(Pending)
+  notes              String?
+  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  installmentplan    installmentplan[]
+  payment            payment[]
+  rentalagreement    rentalagreement[]
+  customer           customer?           @relation(fields: [customer_id], references: [customer_id], onUpdate: NoAction)
+  employee           employee?           @relation(fields: [employee_id], references: [employee_id], onUpdate: NoAction)
+  vehicle            vehicle?            @relation(fields: [vehicle_id], references: [vehicle_id], onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vehicle {
+  vehicle_id         String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  make               String               @db.VarChar(100)
+  model              String               @db.VarChar(100)
+  year               Int
+  vin                String               @unique @db.VarChar(100)
+  license_plate      String               @unique @db.VarChar(50)
+  vehicle_type       vehicle_type
+  status             vehicle_status?      @default(Available)
+  purchase_price     Decimal?             @db.Decimal(12, 2)
+  daily_rental_rate  Decimal?             @db.Decimal(10, 2)
+  current_mileage    Int?                 @default(0)
+  description        String?
+  image_url          String?
+  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  rentalagreement    rentalagreement[]
+  serviceappointment serviceappointment[]
+  servicerecord      servicerecord[]
+  transaction        transaction[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model verification {
+  verification_id     String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  customer_id         String?              @db.Uuid
+  verification_type   verification_type
+  verification_status verification_status? @default(Pending)
+  verification_date   DateTime?            @default(now()) @db.Timestamptz(6)
+  expiry_date         DateTime?            @db.Timestamptz(6)
+  reference_number    String?              @db.VarChar(255)
+  details             String?
+  created_at          DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?            @default(now()) @db.Timestamptz(6)
+  bankaccount         bankaccount[]
+  trafficrecord       trafficrecord[]
+  customer            customer?            @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+enum agreement_status {
+  Active
+  Completed
+  Terminated
+  Overdue
+}
+
+enum appointment_status {
+  Scheduled
+  InProgress
+  Completed
+  Cancelled
+  NoShow
+}
+
+enum bay_status {
+  Available
+  Occupied
+  Maintenance
+  Reserved
+}
+
+enum bay_type {
+  Standard
+  Diagnostic
+  OilChange
+  Tire
+  Electric
+}
+
+enum order_status {
+  Pending
+  Confirmed
+  Shipped
+  Delivered
+  Cancelled
+}
+
+enum payment_method {
+  CreditCard
+  BankTransfer
+  Cash
+  Installment
+}
+
+enum payment_status {
+  Pending
+  Completed
+  Failed
+  Refunded
+}
+
+enum plan_status {
+  Active
+  Completed
+  Defaulted
+  Cancelled
+}
+
+enum sale_status {
+  Pending
+  Completed
+  Cancelled
+  Refunded
+}
+
+enum transaction_status {
+  Pending
+  Completed
+  Cancelled
+  Refunded
+}
+
+enum transaction_type {
+  Rental
+  Purchase
+  Trade_in @map("Trade-in")
+}
+
+enum vehicle_status {
+  Available
+  Rented
+  Sold
+  Maintenance
+  Reserved
+}
+
+enum vehicle_type {
+  Rental
+  Sales
+  Both
+}
+
+enum verification_status {
+  Pending
+  Approved
+  Rejected
+  Expired
+}
+
+enum verification_type {
+  BankAccount
+  TrafficLicense
+  Identity
 }
