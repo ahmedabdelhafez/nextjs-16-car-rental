@@ -6,9 +6,14 @@ import Link from "next/link";
 
 interface LatestUpdatesProps {
   posts: Post[];
+  lng: string;
 }
 
-export function LatestUpdates({ posts }: LatestUpdatesProps) {
+import { getTranslation } from "@/app/i18n/server";
+
+export async function LatestUpdates({ posts, lng }: LatestUpdatesProps) {
+  const { t } = await getTranslation(lng, "common");
+
   if (posts.length === 0) return null;
 
   return (
@@ -21,16 +26,16 @@ export function LatestUpdates({ posts }: LatestUpdatesProps) {
               <span>Stay Informed</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-              Latest from Blog & News
+              {t("common.latestUpdates")}
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl">
               Discover our latest adventures, industry insights, and corporate
               updates.
             </p>
           </div>
-          <Link href="/blog">
+          <Link href={`/${lng}/blog`}>
             <Button variant="outline" className="group">
-              View All Insights
+              {t("common.readMore")}
               {/* <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" /> */}
             </Button>
           </Link>
@@ -38,7 +43,7 @@ export function LatestUpdates({ posts }: LatestUpdatesProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
+            <PostCard key={post.id} post={post} lng={lng} />
           ))}
         </div>
 

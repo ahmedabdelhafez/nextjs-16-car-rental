@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { getAllPosts } from "@/lib/actions/posts";
 import type { Post } from "@/lib/actions/posts";
@@ -13,7 +14,17 @@ export const metadata = {
   description: "Read the latest automotive news and insights.",
 };
 
-export default function BlogPage() {
+import { use } from "react";
+import { useTranslation } from "@/app/i18n/client";
+
+export default function BlogPage({
+  params,
+}: {
+  params: Promise<{ lng: string }>;
+}) {
+  const { lng } = use(params);
+  const { t } = useTranslation(lng, "common");
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -44,7 +55,7 @@ export default function BlogPage() {
               Our Journal
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-              Blog & Insights
+              {t("nav.blog")}
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl">
               Stay updated with the latest trends in the automotive industry,
@@ -98,7 +109,7 @@ export default function BlogPage() {
                 }
               >
                 {posts.map((post) => (
-                  <PostCard key={post.id} post={post} view={view} />
+                  <PostCard key={post.id} post={post} view={view} lng={lng} />
                 ))}
               </div>
             )}

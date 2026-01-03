@@ -4,8 +4,16 @@ import Link from "next/link";
 import { CarPreviewGrid } from "@/components/landing/CarPreviewGrid";
 import { LatestUpdates } from "@/components/landing/LatestUpdates";
 import { getAllPosts, Post } from "@/lib/actions/posts";
+import { getTranslation } from "@/app/i18n/server";
 
-export default async function Home() {
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ lng: string }>;
+}) {
+  const { lng } = await params;
+  const { t } = await getTranslation(lng, "common");
+
   const allPosts = await getAllPosts();
   const latestPosts = allPosts
     .filter((post: Post) => post.status === "published")
@@ -13,7 +21,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Hero />
+      <Hero lng={lng} />
 
       {/* Brands Section Placeholder */}
       <section className="py-12 bg-gray-50 dark:bg-gray-900/50">
@@ -40,21 +48,21 @@ export default async function Home() {
             <h2 className="text-3xl font-bold tracking-tighter">
               Featured Vehicles
             </h2>
-            <Link href="/cars/new">
+            <Link href={`/${lng}/cars`}>
               <Button variant="ghost">View All</Button>
             </Link>
           </div>
 
           <div className="mt-8">
-            <CarPreviewGrid />
+            <CarPreviewGrid lng={lng} />
           </div>
         </div>
       </section>
 
-      <LatestUpdates posts={latestPosts} />
-      <div className="flex justify-center mt-8">
-        <Link href="/blog">
-          <Button>Show More</Button>
+      <LatestUpdates posts={latestPosts} lng={lng} />
+      <div className="flex justify-center mt-8 pb-12">
+        <Link href={`/${lng}/blog`}>
+          <Button>{t("common.showMore")}</Button>
         </Link>
       </div>
     </div>

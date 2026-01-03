@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { getAllPosts } from "@/lib/actions/posts";
 import type { Post } from "@/lib/actions/posts";
@@ -13,7 +14,17 @@ export const metadata = {
   description: "Latest news and updates from CarPortal.",
 };
 
-export default function NewsPage() {
+import { use } from "react";
+import { useTranslation } from "@/app/i18n/client";
+
+export default function NewsPage({
+  params,
+}: {
+  params: Promise<{ lng: string }>;
+}) {
+  const { lng } = use(params);
+  const { t } = useTranslation(lng, "common");
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -44,7 +55,7 @@ export default function NewsPage() {
               Latest Updates
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-              Our Newsroom
+              {t("nav.news")}
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl">
               Stay tuned for corporate news, new branch openings, and special
@@ -98,7 +109,7 @@ export default function NewsPage() {
                 }
               >
                 {posts.map((post) => (
-                  <PostCard key={post.id} post={post} view={view} />
+                  <PostCard key={post.id} post={post} view={view} lng={lng} />
                 ))}
               </div>
             )}

@@ -16,9 +16,14 @@ type Vehicle = Database["public"]["Tables"]["vehicle"]["Row"];
 
 interface CarCardProps {
   vehicle: Vehicle;
+  lng: string;
 }
 
-export function CarCard({ vehicle }: CarCardProps) {
+import { getTranslation } from "@/app/i18n/server";
+
+export async function CarCard({ vehicle, lng }: CarCardProps) {
+  const { t } = await getTranslation(lng, "common");
+
   return (
     <Card className="overflow-hidden flex flex-col h-full group transition-all hover:shadow-lg">
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
@@ -31,14 +36,16 @@ export function CarCard({ vehicle }: CarCardProps) {
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground bg-gray-100 dark:bg-gray-800">
-            No Image
+            {t("common.noImage")}
           </div>
         )}
         <div className="absolute top-2 right-2">
           <Badge
             variant={vehicle.status === "Available" ? "default" : "secondary"}
           >
-            {vehicle.status}
+            {vehicle.status === "Available"
+              ? t("common.available")
+              : t("common.booked")}
           </Badge>
         </div>
       </div>
@@ -50,12 +57,15 @@ export function CarCard({ vehicle }: CarCardProps) {
           <span className="text-lg font-bold text-primary">
             $
             {vehicle.vehicle_type === "Rental"
-              ? `${vehicle.daily_rental_rate}/day`
+              ? `${vehicle.daily_rental_rate}/${t("common.day")}`
               : vehicle.purchase_price?.toLocaleString()}
           </span>
         </div>
         <CardDescription>
-          {vehicle.year} • {vehicle.vehicle_type}
+          {vehicle.year} •{" "}
+          {vehicle.vehicle_type === "Rental"
+            ? t("common.rental")
+            : t("common.sale")}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1">
@@ -64,8 +74,8 @@ export function CarCard({ vehicle }: CarCardProps) {
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <Link href={`/cars/${vehicle.vehicle_id}`} className="w-full">
-          <Button className="w-full">View Details</Button>
+        <Link href={`/${lng}/cars/${vehicle.vehicle_id}`} className="w-full">
+          <Button className="w-full">{t("common.viewDetails")}</Button>
         </Link>
       </CardFooter>
     </Card>

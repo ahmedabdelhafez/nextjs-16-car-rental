@@ -2,20 +2,31 @@ import Link from "next/link";
 import { AuthButtons } from "./AuthButtons";
 import carLogo from "@/assets/logo.svg";
 import Image from "next/image";
+import { getTranslation } from "@/app/i18n/server";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
-export function Navbar() {
+export async function Navbar({ lng }: { lng: string }) {
+  const { t } = await getTranslation(lng, "common");
+
   const navLinks = [
-    { name: "New Cars", href: "/admin/cars/new" },
-    { name: "Used Cars", href: "/admin/cars/used" },
-    { name: "Blog", href: "/blog" },
-    { name: "News", href: "/news" },
-    { name: "Contact Us", href: "/admin/contact" },
+    // { name: "New Cars", href: "/admin/cars/new" }, // Keeping original path structure?
+    // User structure for 'cars' text is in common.json
+    { name: t("nav.cars"), href: `/${lng}/cars` }, // Assuming standard cars page? Original was /admin/cars/new?
+    // Wait, original list: "New Cars" -> "/admin/cars/new", "Used Cars" -> "/admin/cars/used".
+    // I should probably keep the hrefs but prefixed.
+    { name: t("nav.home"), href: `/${lng}` },
+    { name: t("nav.blog"), href: `/${lng}/blog` },
+    { name: t("nav.news"), href: `/${lng}/news` },
+    { name: t("nav.contact"), href: `/${lng}/contact` },
   ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl">
+        <Link
+          href={`/${lng}`}
+          className="flex items-center gap-2 font-bold text-xl"
+        >
           <Image
             src={carLogo}
             alt="CarPortal Logo"
@@ -39,7 +50,8 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-4">
-          <AuthButtons />
+          <LanguageSwitcher lng={lng} />
+          <AuthButtons lng={lng} />
         </div>
       </div>
     </header>

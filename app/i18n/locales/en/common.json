@@ -1,0 +1,27 @@
+{
+    "nav": {
+        "home": "Home",
+        "cars": "Cars",
+        "blog": "Blog",
+        "news": "News",
+        "contact": "Contact",
+        "admin": "Admin"
+    },
+    "hero": {
+        "title": "Find, book, and rent a car easily",
+        "subtitle": "Get a car wherever and whenever you need it from your local hosts."
+    },
+    "common": {
+        "loading": "Loading...",
+        "showMore": "Show More",
+        "readMore": "Read More",
+        "latestUpdates": "Latest Updates",
+        "viewDetails": "View Details",
+        "day": "day",
+        "noImage": "No Image",
+        "available": "Available",
+        "booked": "Booked",
+        "rental": "Rental",
+        "sale": "Sale"
+    }
+}

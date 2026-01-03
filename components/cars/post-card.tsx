@@ -6,18 +6,21 @@ import { Post } from "@/lib/actions/posts";
 // import { Calendar, User, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/app/i18n/client";
 
 interface PostCardProps {
   post: Post;
   view?: "grid" | "list";
+  lng: string;
 }
 
-export function PostCard({ post, view = "grid" }: PostCardProps) {
+export function PostCard({ post, view = "grid", lng }: PostCardProps) {
+  const { t } = useTranslation(lng, "common");
   const isList = view === "list";
 
   return (
     <Link
-      href={`/blog/${post.slug}`}
+      href={`/${lng}/blog/${post.slug}`}
       className={cn(
         "group block bg-card rounded-xl overflow-hidden border transition-all hover:shadow-lg hover:-translate-y-1",
         isList
@@ -39,7 +42,7 @@ export function PostCard({ post, view = "grid" }: PostCardProps) {
         />
         <div className="absolute top-4 left-4">
           <Badge className="bg-primary/90 hover:bg-primary backdrop-blur-sm">
-            {post.type === "blog" ? "Blog" : "News"}
+            {post.type === "blog" ? t("nav.blog") : t("nav.news")}
           </Badge>
         </div>
       </div>
@@ -67,7 +70,7 @@ export function PostCard({ post, view = "grid" }: PostCardProps) {
         </div>
 
         <div className="mt-4 flex items-center text-primary font-semibold text-sm group-hover:gap-2 transition-all">
-          Read More
+          {t("common.readMore")}
           {/* <ArrowRight className="h-4 w-4 ml-1 opacity-0 group-hover:opacity-100 transition-all" /> */}
         </div>
       </div>

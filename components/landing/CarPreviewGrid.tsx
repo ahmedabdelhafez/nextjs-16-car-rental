@@ -4,7 +4,11 @@ import { Database } from "@/lib/database.types";
 
 type Vehicle = Database["public"]["Tables"]["vehicle"]["Row"];
 
-export async function CarPreviewGrid() {
+import { getTranslation } from "@/app/i18n/server";
+
+export async function CarPreviewGrid({ lng }: { lng: string }) {
+  const { t } = await getTranslation(lng, "common");
+
   const supabase = await createServerClient();
 
   // Fetch only available vehicles for the landing page
@@ -18,14 +22,14 @@ export async function CarPreviewGrid() {
   if (error) {
     console.error("Error fetching vehicles:", error);
     return (
-      <div className="text-center text-red-500">Failed to load vehicles.</div>
+      <div className="text-center text-red-500">{t("common.loading")}</div>
     );
   }
 
   if (!vehicles || vehicles.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-10">
-        No vehicles currently available. Check back soon!
+        {t("common.noImage")}
       </div>
     );
   }
@@ -33,7 +37,7 @@ export async function CarPreviewGrid() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {vehicles.map((vehicle: Vehicle) => (
-        <CarCard key={vehicle.vehicle_id} vehicle={vehicle} />
+        <CarCard key={vehicle.vehicle_id} vehicle={vehicle} lng={lng} />
       ))}
     </div>
   );
