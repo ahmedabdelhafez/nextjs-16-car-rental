@@ -50,7 +50,8 @@ export default async function ShowroomsPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              showrooms?.map((showroom) => (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              showrooms?.map((showroom: any) => (
                 <TableRow key={showroom.id}>
                   <TableCell className="font-medium">{showroom.name}</TableCell>
                   <TableCell>{showroom.location}</TableCell>
@@ -63,7 +64,14 @@ export default async function ShowroomsPage() {
                           <Edit className="h-4 w-4" />
                         </Button>
                       </Link>
-                      <form action={deleteShowroom.bind(null, showroom.id)}>
+                      <form
+                        action={
+                          deleteShowroom.bind(
+                            null,
+                            showroom.id
+                          ) as unknown as string
+                        }
+                      >
                         <Button
                           variant="ghost"
                           size="icon"

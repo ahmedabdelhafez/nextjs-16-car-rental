@@ -9,7 +9,6 @@ import {
   LogOut,
   ChevronRight,
   ChevronsUpDown,
-  Plus,
 } from "lucide-react";
 
 import {
@@ -27,7 +26,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -45,13 +43,12 @@ import {
 } from "@/components/ui/collapsible";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
+import { useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const data = {
-  user: {
-    name: "Admin User",
-    email: "admin@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
@@ -89,6 +86,28 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -171,14 +190,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={data.user.avatar} alt={data.user.name} />
+                    <AvatarImage
+                      src={user?.user_metadata.avatar_url}
+                      alt={user?.user_metadata.full_name}
+                    />
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
-                      {data.user.name}
+                      {user?.user_metadata.full_name}
                     </span>
-                    <span className="truncate text-xs">{data.user.email}</span>
+                    <span className="truncate text-xs">{user?.email}</span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4" />
                 </SidebarMenuButton>
@@ -193,18 +215,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage
-                        src={data.user.avatar}
-                        alt={data.user.name}
+                        src={user?.user_metadata.avatar_url}
+                        alt={user?.user_metadata.full_name}
                       />
                       <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">
-                        {data.user.name}
+                        {user?.user_metadata.full_name}
                       </span>
-                      <span className="truncate text-xs">
-                        {data.user.email}
-                      </span>
+                      <span className="truncate text-xs">{user?.email}</span>
                     </div>
                   </div>
                 </DropdownMenuLabel>

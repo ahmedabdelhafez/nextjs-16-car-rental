@@ -46,7 +46,8 @@ export default async function ContactMessagesPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              messages?.map((msg) => (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              messages?.map((msg: any) => (
                 <TableRow key={msg.id}>
                   <TableCell>
                     {new Date(msg.created_at).toLocaleDateString()}
@@ -70,18 +71,27 @@ export default async function ContactMessagesPage() {
                     <div className="flex justify-end gap-2">
                       {msg.status === "New" && (
                         <form
-                          action={updateMessageStatus.bind(
-                            null,
-                            msg.id,
-                            "Read"
-                          )}
+                          action={
+                            updateMessageStatus.bind(
+                              null,
+                              msg.id,
+                              "Read"
+                            ) as unknown as string
+                          }
                         >
                           <Button variant="outline" size="sm">
                             Mark Read
                           </Button>
                         </form>
                       )}
-                      <form action={deleteContactMessage.bind(null, msg.id)}>
+                      <form
+                        action={
+                          deleteContactMessage.bind(
+                            null,
+                            msg.id
+                          ) as unknown as string
+                        }
+                      >
                         <Button
                           variant="ghost"
                           size="icon"

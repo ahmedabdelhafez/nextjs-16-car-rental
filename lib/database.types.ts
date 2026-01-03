@@ -108,13 +108,13 @@ export type Database = {
       };
       partsale: {
         Row: {
-          [key: string]: any;
+          [key: string]: Json;
         };
         Insert: {
-          [key: string]: any;
+          [key: string]: Json;
         };
         Update: {
-          [key: string]: any;
+          [key: string]: Json;
         };
       };
       // Add other tables as needed for type safety

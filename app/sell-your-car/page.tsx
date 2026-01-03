@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Card,
@@ -23,7 +22,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-// import { Textarea } from "@/components/ui/textarea" // Placeholder until installed
+import { GoogleMapPicker } from "@/components/ui/google-map-picker";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 const formSchema = z.object({
   make: z.string().min(1, "Make is required"),
@@ -33,15 +33,16 @@ const formSchema = z.object({
     .min(1900)
     .max(new Date().getFullYear() + 1),
   price: z.coerce.number().min(0, "Price must be positive"),
-  mileage: z.coerce.number().min(0),
+  mileage: z.coerce.number().min(0, "Mileage must be positive"),
   description: z.string().optional(),
   licensePlate: z.string().min(1, "License plate is required"),
   vin: z.string().min(1, "VIN is required"),
-  // image: z.instanceof(FileList).optional() // Handling file upload separately for simplicity
+  image_urls: z.array(z.string()).min(1, "At least one image is required"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
 export default function SellCarPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -56,6 +57,9 @@ export default function SellCarPage() {
       description: "",
       licensePlate: "",
       vin: "",
+      image_urls: [],
+      latitude: undefined,
+      longitude: undefined,
     },
   });
 
@@ -63,23 +67,8 @@ export default function SellCarPage() {
     setError(null);
     const supabase = createClient();
 
-    // Check if user is logged in (optional, but good practice)
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    /*
-    if (!user) {
-        setError("You must be logged in to submit a request.")
-        return
-    }
-    */
-
-    // Insert into vehicle table with status 'Maintenance' (Pending approval) or 'Available' if auto-approved
-    // Actually, per prompt: "admin can review it and accept or reject". So status should be something like "Maintenance" or "Pending" (if we add enum).
-    // Our enum for status: 'Available', 'Rented', 'Sold', 'Maintenance', 'Reserved'.
-    // We can use 'Maintenance' as Pending, or add 'Pending' to enum.
-    // Let's use 'Maintenance' for now.
+    // Check user auth if needed, but for now we proceed.
+    // const { data: { user } } = await supabase.auth.getUser();
 
     const { error: dbError } = await supabase.from("vehicle").insert({
       make: values.make,
@@ -87,15 +76,15 @@ export default function SellCarPage() {
       year: values.year,
       vin: values.vin,
       license_plate: values.licensePlate,
-      vehicle_type: "Sales", // Assuming client added cars are for sale
+      vehicle_type: "Sales",
       status: "Maintenance", // Pending approval
       purchase_price: values.price,
       current_mileage: values.mileage,
       description: values.description,
+      image_urls: values.image_urls,
+      latitude: values.latitude,
+      longitude: values.longitude,
       created_at: new Date().toISOString(),
-      // owner_id: user.id // We don't have owner_id column in Vehicle table in prompt schema!
-      // Schema update might be needed if we want to track who submitted it.
-      // For now, we just insert it.
     });
 
     if (dbError) {
@@ -249,6 +238,29 @@ export default function SellCarPage() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <FormLabel>Map Location</FormLabel>
+                <div className="h-[300px]">
+                  <GoogleMapPicker
+                    value={
+                      form.getValues("latitude") && form.getValues("longitude")
+                        ? {
+                            lat: form.getValues("latitude")!,
+                            lng: form.getValues("longitude")!,
+                          }
+                        : undefined
+                    }
+                    onChange={(pos) => {
+                      form.setValue("latitude", pos.lat);
+                      form.setValue("longitude", pos.lng);
+                    }}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Click on the map to set the exact location.
+                </p>
+              </div>
+
               <FormField
                 control={form.control}
                 name="description"
@@ -259,6 +271,25 @@ export default function SellCarPage() {
                       <Input
                         placeholder="Condition, features, etc."
                         {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="image_urls"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Vehicle Images</FormLabel>
+                    <FormControl>
+                      <ImageUpload
+                        value={field.value}
+                        onChange={(urls) => field.onChange(urls)}
+                        bucketName="vehicles"
+                        multiple
                       />
                     </FormControl>
                     <FormMessage />

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Car } from "lucide-react";
 import { AuthButtons } from "./AuthButtons";
+import carLogo from "@/assets/logo.svg";
+import Image from "next/image";
 
 export function Navbar() {
   const navLinks = [
@@ -15,7 +16,13 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-          <Car className="h-6 w-6 text-primary" />
+          <Image
+            src={carLogo}
+            alt="CarPortal Logo"
+            className="h-24 w-24 text-primary"
+            width={100}
+            height={100}
+          />
           <span>CarPortal</span>
         </Link>
 

@@ -12,7 +12,10 @@ const contactSchema = z.object({
   message: z.string().min(1, "Message is required"),
 });
 
-export async function submitContactForm(prevState: any, formData: FormData) {
+export async function submitContactForm(
+  prevState: unknown,
+  formData: FormData
+) {
   const supabase = await createClient();
 
   const rawData = {

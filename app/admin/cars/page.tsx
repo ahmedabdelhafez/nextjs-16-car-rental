@@ -52,7 +52,8 @@ export default async function CarsPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              cars?.map((car) => (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              cars?.map((car: any) => (
                 <TableRow key={car.id}>
                   <TableCell className="font-medium">{car.make}</TableCell>
                   <TableCell>{car.model}</TableCell>
@@ -67,7 +68,11 @@ export default async function CarsPage() {
                           <Edit className="h-4 w-4" />
                         </Button>
                       </Link>
-                      <form action={deleteCar.bind(null, car.id)}>
+                      <form
+                        action={
+                          deleteCar.bind(null, car.id) as unknown as string
+                        }
+                      >
                         <Button
                           variant="ghost"
                           size="icon"

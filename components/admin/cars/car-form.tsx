@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,6 +25,9 @@ import { createCar, updateCar } from "@/lib/actions/cars";
 import { useTransition } from "react";
 import { Loader2 } from "lucide-react";
 
+import { GoogleMapPicker } from "@/components/ui/google-map-picker";
+import { ImageUpload } from "@/components/ui/image-upload";
+
 const formSchema = z.object({
   make: z.string().min(1, "Make is required"),
   model: z.string().min(1, "Model is required"),
@@ -34,6 +36,12 @@ const formSchema = z.object({
   mileage: z.coerce.number().min(0, "Mileage must be positive"),
   condition: z.enum(["New", "Used"]),
   description: z.string().optional(),
+  image_urls: z.array(z.string()).optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  status: z
+    .enum(["Available", "Sold", "Rented", "Maintenance"])
+    .default("Available"),
 });
 
 type CarFormProps = {
@@ -53,20 +61,28 @@ export function CarForm({ car }: CarFormProps) {
       mileage: 0,
       condition: "New",
       description: "",
+      image_urls: [],
+      latitude: undefined,
+      longitude: undefined,
+      status: "Available",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
-      const formData = new FormData();
-      Object.entries(values).forEach(([key, value]) => {
+    const formData = new FormData();
+    Object.entries(values).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => formData.append(key, String(v)));
+      } else if (value !== undefined && value !== null) {
         formData.append(key, String(value));
-      });
+      }
+    });
 
+    startTransition(() => {
       if (car) {
-        await updateCar(car.id, null, formData);
+        updateCar(car.id, null, formData);
       } else {
-        await createCar(null, formData);
+        createCar(null, formData);
       }
     });
   }
@@ -161,27 +177,81 @@ export function CarForm({ car }: CarFormProps) {
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="condition"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Condition</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select condition" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="New">New</SelectItem>
-                  <SelectItem value="Used">Used</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="condition"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Condition</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select condition" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="New">New</SelectItem>
+                    <SelectItem value="Used">Used</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Available">Available</SelectItem>
+                    <SelectItem value="Sold">Sold</SelectItem>
+                    <SelectItem value="Rented">Rented</SelectItem>
+                    <SelectItem value="Maintenance">Maintenance</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <FormLabel>Map Location</FormLabel>
+          <div className="h-[300px]">
+            <GoogleMapPicker
+              value={
+                form.getValues("latitude") && form.getValues("longitude")
+                  ? {
+                      lat: form.getValues("latitude")!,
+                      lng: form.getValues("longitude")!,
+                    }
+                  : undefined
+              }
+              onChange={(pos) => {
+                form.setValue("latitude", pos.lat);
+                form.setValue("longitude", pos.lng);
+              }}
+            />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Click on the map to set the exact location.
+          </p>
+        </div>
 
         <FormField
           control={form.control}
@@ -191,6 +261,25 @@ export function CarForm({ car }: CarFormProps) {
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea placeholder="Car details..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="image_urls"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Car Images</FormLabel>
+              <FormControl>
+                <ImageUpload
+                  value={field.value || []}
+                  onChange={(urls) => field.onChange(urls)}
+                  bucketName="vehicles"
+                  multiple
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -17,12 +17,17 @@ import { createShowroom, updateShowroom } from "@/lib/actions/showrooms";
 import { useTransition } from "react";
 import { Loader2 } from "lucide-react";
 
+import { GoogleMapPicker } from "@/components/ui/google-map-picker";
+import { ImageUpload } from "@/components/ui/image-upload";
+
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   location: z.string().min(1, "Location is required"),
   phone: z.string().optional(),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   image_url: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
 type ShowroomFormProps = {
@@ -40,6 +45,8 @@ export function ShowroomForm({ showroom }: ShowroomFormProps) {
       phone: "",
       email: "",
       image_url: "",
+      latitude: undefined,
+      longitude: undefined,
     },
   });
 
@@ -47,7 +54,9 @@ export function ShowroomForm({ showroom }: ShowroomFormProps) {
     startTransition(async () => {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
-        if (value) formData.append(key, String(value));
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
       });
 
       if (showroom) {
@@ -83,7 +92,7 @@ export function ShowroomForm({ showroom }: ShowroomFormProps) {
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormLabel>Location Name</FormLabel>
                 <FormControl>
                   <Input placeholder="123 Main St, NY" {...field} />
                 </FormControl>
@@ -91,6 +100,29 @@ export function ShowroomForm({ showroom }: ShowroomFormProps) {
               </FormItem>
             )}
           />
+        </div>
+
+        <div className="space-y-2">
+          <FormLabel>Map Location</FormLabel>
+          <div className="h-[300px]">
+            <GoogleMapPicker
+              value={
+                form.getValues("latitude") && form.getValues("longitude")
+                  ? {
+                      lat: form.getValues("latitude")!,
+                      lng: form.getValues("longitude")!,
+                    }
+                  : undefined
+              }
+              onChange={(pos: { lat: number; lng: number }) => {
+                form.setValue("latitude", pos.lat);
+                form.setValue("longitude", pos.lng);
+              }}
+            />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Click on the map to set the exact location.
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -127,9 +159,13 @@ export function ShowroomForm({ showroom }: ShowroomFormProps) {
           name="image_url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL (Optional)</FormLabel>
+              <FormLabel>Showroom Image</FormLabel>
               <FormControl>
-                <Input placeholder="https://example.com/image.jpg" {...field} />
+                <ImageUpload
+                  value={field.value ? [field.value] : []}
+                  onChange={(urls) => field.onChange(urls[0] || "")}
+                  bucketName="showrooms"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

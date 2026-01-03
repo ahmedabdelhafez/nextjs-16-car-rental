@@ -11,9 +11,11 @@ const showroomSchema = z.object({
   phone: z.string().optional(),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   image_url: z.string().optional(),
+  latitude: z.coerce.number().optional(),
+  longitude: z.coerce.number().optional(),
 });
 
-export async function createShowroom(prevState: any, formData: FormData) {
+export async function createShowroom(prevState: unknown, formData: FormData) {
   const supabase = await createClient();
 
   const rawData = {
@@ -22,6 +24,8 @@ export async function createShowroom(prevState: any, formData: FormData) {
     phone: formData.get("phone"),
     email: formData.get("email"),
     image_url: formData.get("image_url"),
+    latitude: formData.get("latitude"),
+    longitude: formData.get("longitude"),
   };
 
   const validatedFields = showroomSchema.safeParse(rawData);
@@ -49,7 +53,7 @@ export async function createShowroom(prevState: any, formData: FormData) {
 
 export async function updateShowroom(
   id: string,
-  prevState: any,
+  prevState: unknown,
   formData: FormData
 ) {
   const supabase = await createClient();
@@ -60,6 +64,8 @@ export async function updateShowroom(
     phone: formData.get("phone"),
     email: formData.get("email"),
     image_url: formData.get("image_url"),
+    latitude: formData.get("latitude"),
+    longitude: formData.get("longitude"),
   };
 
   const validatedFields = showroomSchema.safeParse(rawData);

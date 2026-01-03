@@ -6,8 +6,8 @@ export default function ContactPage() {
       <div className="space-y-2 mb-8 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Contact Us</h1>
         <p className="text-muted-foreground">
-          Have questions? We'd love to hear from you. Send us a message and
-          we'll respond as soon as possible.
+          We&apos;d love to hear from you. Send us a message and we&apos;ll
+          respond as soon as possible.
         </p>
       </div>
       <div className="border rounded-lg p-8 bg-card shadow-sm">
