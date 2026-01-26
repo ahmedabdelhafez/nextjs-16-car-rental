@@ -5,6 +5,7 @@ import { CarPreviewGrid } from "@/components/landing/CarPreviewGrid";
 import { LatestUpdates } from "@/components/landing/LatestUpdates";
 import { getAllPosts, Post } from "@/lib/actions/posts";
 import { getTranslation } from "@/app/i18n/server";
+import { BrandsCarousel } from "@/components/landing/BrandsCarousel";
 
 export default async function Home({
   params,
@@ -23,20 +24,14 @@ export default async function Home({
     <div className="flex flex-col min-h-screen">
       <Hero lng={lng} />
 
-      {/* Brands Section Placeholder */}
+      {/* Brands Section */}
       <section className="py-12 bg-gray-50 dark:bg-gray-900/50">
         <div className="container px-4 md:px-6">
           <h2 className="text-2xl font-bold text-center mb-8">
             Popular Brands
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center justify-items-center opacity-70">
-            {/* We can use icons or text here */}
-            <span className="text-xl font-semibold">Toyota</span>
-            <span className="text-xl font-semibold">BMW</span>
-            <span className="text-xl font-semibold">Mercedes</span>
-            <span className="text-xl font-semibold">Audi</span>
-            <span className="text-xl font-semibold">Honda</span>
-            <span className="text-xl font-semibold">Tesla</span>
+          <div className="flex justify-center">
+            <BrandsCarousel />
           </div>
         </div>
       </section>

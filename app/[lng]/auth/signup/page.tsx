@@ -69,6 +69,8 @@ export default function SignUpPage() {
     });
 
     if (authError) {
+      console.log("auth error here");
+      console.log(authError);
       setError(authError.message);
       return;
     }

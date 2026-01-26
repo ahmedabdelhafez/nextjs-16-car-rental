@@ -161,6 +161,41 @@ export type Database = {
           updated_at?: string;
         };
       };
+      profile: {
+        Row: {
+          id: string;
+          user_id: string;
+          main_role: string[] | null;
+          first_name: string | null;
+          last_name: string | null;
+          default_role: string | null;
+          image_id: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          main_role?: string[] | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          default_role?: string | null;
+          image_id?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          main_role?: string[] | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          default_role?: string | null;
+          image_id?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
