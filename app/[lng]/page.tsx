@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CarPreviewGrid } from "@/components/landing/CarPreviewGrid";
 import { LatestUpdates } from "@/components/landing/LatestUpdates";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { getAllPosts, Post } from "@/lib/actions/posts";
 import { getTranslation } from "@/app/i18n/server";
 import { BrandsCarousel } from "@/components/landing/BrandsCarousel";
@@ -25,26 +26,23 @@ export default async function Home({
       <Hero lng={lng} />
 
       {/* Brands Section */}
-      <section className="py-12 bg-gray-50 dark:bg-gray-900/50">
-        <div className="container px-4 md:px-6">
-          <h2 className="text-2xl font-bold text-center mb-8">
-            Popular Brands
-          </h2>
-          <div className="flex justify-center">
-            <BrandsCarousel />
-          </div>
+      <section className="py-2 bg-gray-50 dark:bg-black/20 border-y border-gray-100 dark:border-gray-800">
+        <div className="w-full">
+          <BrandsCarousel />
         </div>
       </section>
 
       {/* Featured Cars Section Placeholder */}
-      <section className="py-12 md:py-24">
+      <section className="py-24">
         <div className="container px-4 md:px-6">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold tracking-tighter">
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
               Featured Vehicles
             </h2>
             <Link href={`/${lng}/cars`}>
-              <Button variant="ghost">View All</Button>
+              <Button variant="outline" className="gap-2">
+                View All <span aria-hidden="true">&rarr;</span>
+              </Button>
             </Link>
           </div>
 
@@ -54,10 +52,14 @@ export default async function Home({
         </div>
       </section>
 
+      <FeaturesSection />
+
       <LatestUpdates posts={latestPosts} lng={lng} />
       <div className="flex justify-center mt-8 pb-12">
         <Link href={`/${lng}/blog`}>
-          <Button>{t("common.showMore")}</Button>
+          <Button size="lg" variant="secondary">
+            {t("common.showMore")}
+          </Button>
         </Link>
       </div>
     </div>
