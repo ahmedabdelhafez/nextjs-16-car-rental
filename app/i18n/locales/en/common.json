@@ -29,5 +29,14 @@
         "signUp": "Sign Up",
         "signOut": "Sign Out",
         "hello": "Hello"
+    },
+    "footer": {
+        "aboutTitle": "About CarPortal",
+        "aboutDescription": "Your premium car rental and purchase partner. Find the perfect vehicle for any occasion with our easy-to-use platform.",
+        "quickLinks": "Quick Links",
+        "contactUs": "Contact Us",
+        "rights": "All rights reserved.",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy"
     }
 }

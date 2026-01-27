@@ -18,6 +18,8 @@ export async function generateStaticParams() {
   return languages.map((lng) => ({ lng }));
 }
 
+import { Footer } from "@/components/layout/Footer";
+
 export default async function RootLayout({
   children,
   params,
@@ -32,11 +34,12 @@ export default async function RootLayout({
       <body
         className={cn(
           inter.className,
-          "min-h-screen bg-background antialiased"
+          "min-h-screen bg-background antialiased flex flex-col",
         )}
       >
         <Navbar lng={lng} />
         <main className="flex-1">{children}</main>
+        <Footer lng={lng} />
       </body>
     </html>
   );
